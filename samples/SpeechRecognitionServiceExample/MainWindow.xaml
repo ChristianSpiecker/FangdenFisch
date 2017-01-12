@@ -18,19 +18,60 @@
             </Button.Template>
         </Button>
 
+        <ListView Margin="200,100,200,100">
+
+            <ListView.View>
+
+                <GridView AllowsColumnReorder="true"
+                        ColumnHeaderToolTip="Employee Information">
+
+                    <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=FirstName}" 
+                      Header="Kundenname"/>
+
+                    <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=LastName}">
+                        <GridViewColumnHeader>Betrag
+                            <GridViewColumnHeader.ContextMenu>
+                                <ContextMenu    
+                                        Name="Betrag">
+                                    <MenuItem Header="Ascending" />
+                                    <MenuItem Header="Descending" />
+                                </ContextMenu>
+                            </GridViewColumnHeader.ContextMenu>
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+                    <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=EmployeeNumber}" 
+                      Header="Datum"/>
+
+                    <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=Format}" Header="Format"/>
+
+
+
+
+                </GridView>
+
+            </ListView.View>
+        </ListView>
+
+
+
+
+
         <!-- Progress Window, gibt immer die aktuell gesprochenen Worte aus -->
-        <TextBox x:Name="_logText" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Height="200" Width="300" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <TextBox x:Name="_logText" TextWrapping="Wrap" Text="" FontSize="9" VerticalScrollBarVisibility="Visible" Height="200" Width="200" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
 
         <!-- Key Eingabe+Buttons -->
         <Grid HorizontalAlignment="Left" Width="200" Height="50" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=_mainWindow, Path=SubscriptionKey, Mode=TwoWay}" Height="20"/>
                 <Button Height="30" Click="SaveKey_Click" Content="Save Key"/>
                 <Button Height="30" Click="DeleteKey_Click" Content="Delete Key"/>
                 <Button Height="30" Click="HelpButton_Click" Content="Get Key" />
+                <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=_mainWindow, Path=SubscriptionKey, Mode=TwoWay}" Height="20"/>
             </StackPanel>
         </Grid>
-        
     </Grid>
-
 </Window>
