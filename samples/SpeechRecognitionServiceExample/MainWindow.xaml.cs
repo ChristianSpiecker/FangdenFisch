@@ -43,13 +43,22 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     using System.Net.Sockets;
     using System.Runtime.CompilerServices;
     using System.Text;
+    using System.Threading;
     using System.Windows;
+    using System.Web;
+    using System.Net.Http;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private StreamWriter swSender;
+        private StreamReader srReceiver;
+        private TcpClient tcpServer;
+        private Thread thrMessaging;
+        private IPAddress ipAddr;
+        private bool Connected;
         /// <summary>
         /// The isolated storage subscription key file name.
         /// </summary>
@@ -83,8 +92,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             this.InitializeComponent();
             this.Initialize();
-            Console.WriteLine("____________________________________________________________TEST");
-            communication("localhost", 8080);
+            InitializeConnection();            
         }
 
         #region Events
@@ -607,6 +615,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 for (int i = 0; i < e.PhraseResponse.Results.Length; i++)
                 {
                     Console.WriteLine(e.PhraseResponse.Results[i].DisplayText);
+                    SendMessage(e.PhraseResponse.Results[i].DisplayText);
                 }
 
                 _meinText.Text = e.PhraseResponse.Results[0].DisplayText;
@@ -876,62 +885,124 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             //this._radioGroup.IsEnabled = true;
         }
 
-        public void communication(string server, int port)
+        /*       public void communication(string server, int port)
+               {
+                   string request = "GET / HTTP/1.1\r\nHost: " + server +
+                   "\r\nConnection: Close\r\n\r\n";
+                   Byte[] bytesSent = Encoding.ASCII.GetBytes(request);
+                   Byte[] bytesReceived = new Byte[256];
+                   string test;
+                   //Socket s = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                   Socket s = ConnectSocket(server, port);
+                   s.Send(bytesSent, bytesSent.Length, 0);
+
+                   // Receive the server home page content.
+                   int bytes = 0;
+                   string page = "test";
+
+                   // The following will block until te page is transmitted.
+                   do
+                   {
+                       bytes = s.Receive(bytesReceived, bytesReceived.Length, 0);
+                       page = page + Encoding.ASCII.GetString(bytesReceived, 0, bytes);
+                   }
+                   while (bytes > 0);
+
+                   Console.WriteLine(page);
+               }
+
+               private static Socket ConnectSocket(string server, int port)
+               {
+                   Socket s = null;
+                   IPHostEntry hostEntry = null;
+
+                   // Get host related information.
+                   hostEntry = Dns.GetHostEntry(server);
+
+                   // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
+                   // an exception that occurs when the host IP Address is not compatible with the address family
+                   // (typical in the IPv6 case).
+                   foreach (IPAddress address in hostEntry.AddressList)
+                   {
+                       IPEndPoint ipe = new IPEndPoint(address, port);
+                       Socket tempSocket =
+                           new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+                       tempSocket.Connect(ipe);
+
+                       if (tempSocket.Connected)
+                       {
+                           s = tempSocket;
+                           break;
+                       }
+                       else
+                       {
+                           continue;
+                       }
+                   }
+                   return s;
+               }*/
+
+        private void InitializeConnection()
         {
-            string request = "GET / HTTP/1.1\r\nHost: " + server +
-            "\r\nConnection: Close\r\n\r\n";
-            Byte[] bytesSent = Encoding.ASCII.GetBytes(request);
-            Byte[] bytesReceived = new Byte[256];
-            string test;
-            //Socket s = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            Socket s = ConnectSocket(server, port);
-            s.Send(bytesSent, bytesSent.Length, 0);
+            // Parse the IP address
 
-            // Receive the server home page content.
-            int bytes = 0;
-            string page = "test";
+            string ipAdress = "172.26.38.107";
+            ipAddr = IPAddress.Parse(ipAdress);
 
-            // The following will block until te page is transmitted.
-            do
+
+            // Start a new TCP connections to the chat server
+            tcpServer = new TcpClient();
+            try
             {
-                bytes = s.Receive(bytesReceived, bytesReceived.Length, 0);
-                page = page + Encoding.ASCII.GetString(bytesReceived, 0, bytes);
-            }
-            while (bytes > 0);
+                tcpServer.Connect(ipAddr, 6789);
+                swSender = new StreamWriter(tcpServer.GetStream());
 
-            Console.WriteLine(page);
+
+                // Start the thread for receiving messages and further communication
+                thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
+                thrMessaging.Start();
+                Connected = true;
+            }
+            catch (Exception e2)
+            {
+                MessageBox.Show(e2.ToString());
+            }
         }
 
-        private static Socket ConnectSocket(string server, int port)
+        private void ReceiveMessages()
         {
-            Socket s = null;
-            IPHostEntry hostEntry = null;
-
-            // Get host related information.
-            hostEntry = Dns.GetHostEntry(server);
-
-            // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
-            // an exception that occurs when the host IP Address is not compatible with the address family
-            // (typical in the IPv6 case).
-            foreach (IPAddress address in hostEntry.AddressList)
+            // Receive the response from the server
+            srReceiver = new StreamReader(tcpServer.GetStream());
+            while (Connected)
             {
-                IPEndPoint ipe = new IPEndPoint(address, port);
-                Socket tempSocket =
-                    new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                String con = srReceiver.ReadLine();
+                string StringMessage = HttpUtility.UrlDecode(con, System.Text.Encoding.UTF8);
 
-                tempSocket.Connect(ipe);
+                processMessage(StringMessage);
 
-                if (tempSocket.Connected)
-                {
-                    s = tempSocket;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
+
+
             }
-            return s;
         }
+
+        private void processMessage(String p)
+        {
+            Console.WriteLine("der server antwortet:" +p);
+        }
+        private void SendMessage(String p)
+        {
+            if (p != "")
+            {
+                p = HttpUtility.UrlEncode(p, System.Text.Encoding.UTF8);
+                swSender.WriteLine(p);
+                swSender.Flush();
+
+            }
+
+        }
+
+
     }
 }
+
