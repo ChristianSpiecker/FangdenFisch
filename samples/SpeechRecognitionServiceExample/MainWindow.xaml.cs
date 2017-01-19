@@ -92,7 +92,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             this.InitializeComponent();
             this.Initialize();
-            InitializeConnection();            
+                     
         }
 
         #region Events
@@ -615,6 +615,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 for (int i = 0; i < e.PhraseResponse.Results.Length; i++)
                 {
                     Console.WriteLine(e.PhraseResponse.Results[i].DisplayText);
+                    InitializeConnection();
                     SendMessage(e.PhraseResponse.Results[i].DisplayText);
                 }
 
@@ -955,7 +956,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             tcpServer = new TcpClient();
             try
             {
-                tcpServer.Connect(ipAddr, 6789);
+                tcpServer.Connect(ipAddr, 420);
                 swSender = new StreamWriter(tcpServer.GetStream());
 
 
@@ -972,28 +973,27 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void ReceiveMessages()
         {
+            
             // Receive the response from the server
             srReceiver = new StreamReader(tcpServer.GetStream());
             while (Connected)
             {
+                Console.WriteLine("empfangen");
                 String con = srReceiver.ReadLine();
                 string StringMessage = HttpUtility.UrlDecode(con, System.Text.Encoding.UTF8);
-
                 processMessage(StringMessage);
-
-
-
             }
         }
 
         private void processMessage(String p)
         {
-            Console.WriteLine("der server antwortet:" +p);
+            Console.WriteLine("der server antwortet: " +p);
         }
         private void SendMessage(String p)
         {
             if (p != "")
             {
+                Console.Write("gesendet: " + p);
                 p = HttpUtility.UrlEncode(p, System.Text.Encoding.UTF8);
                 swSender.WriteLine(p);
                 swSender.Flush();
