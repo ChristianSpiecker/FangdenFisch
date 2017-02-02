@@ -23,18 +23,12 @@
             <ListView.View>
 
                 <GridView AllowsColumnReorder="true"
-                        ColumnHeaderToolTip="Employee Information">
+                        ColumnHeaderToolTip="Details">
 
-                    <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=FirstName}" 
-                      Header="Kundenname"/>
-
-                    <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=LastName}">
-                        <GridViewColumnHeader>Betrag
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=FirstName}">
+                        <GridViewColumnHeader>Kundenname
                             <GridViewColumnHeader.ContextMenu>
-                                <ContextMenu    
-                                        Name="Betrag">
+                                <ContextMenu Name="Kundenname">
                                     <MenuItem Header="Ascending" />
                                     <MenuItem Header="Descending" />
                                 </ContextMenu>
@@ -42,12 +36,38 @@
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
-                    <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=EmployeeNumber}" 
-                      Header="Datum"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=LastName}">
+                        <GridViewColumnHeader>Betrag
+                            <GridViewColumnHeader.ContextMenu>
+                                <ContextMenu Name="Betrag">
+                                    <MenuItem Header="Ascending" />
+                                    <MenuItem Header="Descending" />
+                                </ContextMenu>
+                            </GridViewColumnHeader.ContextMenu>
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
 
-                    <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Format}" Header="Format"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Date}">
+                        <GridViewColumnHeader>Datum
+                            <GridViewColumnHeader.ContextMenu>
+                                <ContextMenu Name="Datum">
+                                    <MenuItem Header="Ascending" />
+                                    <MenuItem Header="Descending" />
+                                </ContextMenu>
+                            </GridViewColumnHeader.ContextMenu>
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Number}">
+                        <GridViewColumnHeader>Kundennummer
+                            <GridViewColumnHeader.ContextMenu>
+                                <ContextMenu Name="Kundennummer">
+                                    <MenuItem Header="Ascending" />
+                                    <MenuItem Header="Descending" />
+                                </ContextMenu>
+                            </GridViewColumnHeader.ContextMenu>
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
 
 
 

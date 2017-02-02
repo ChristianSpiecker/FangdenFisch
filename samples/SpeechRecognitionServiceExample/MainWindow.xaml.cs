@@ -164,7 +164,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             set
             {
-                this.subscriptionKey = value;
+                this.subscriptionKey = "b943e5d1a1b5426f84720d15ad9be64e";
                 //this.OnPropertyChanged<string>();
             }
         }
