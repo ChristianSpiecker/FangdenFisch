@@ -948,7 +948,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             // Parse the IP address
 
-            string ipAdress = "172.26.38.107";
+            string ipAdress = "172.26.38.110";
             ipAddr = IPAddress.Parse(ipAdress);
 
 
@@ -982,6 +982,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 String con = srReceiver.ReadLine();
                 string StringMessage = HttpUtility.UrlDecode(con, System.Text.Encoding.UTF8);
                 processMessage(StringMessage);
+                //Filename?File\n kein File -> NoFile\n
             }
         }
 
@@ -994,6 +995,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             if (p != "")
             {
                 Console.Write("gesendet: " + p);
+                // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                p = "Gib mir alle Rechnungen vom Kunden Rheinwerk Group";
                 p = HttpUtility.UrlEncode(p, System.Text.Encoding.UTF8);
                 swSender.WriteLine(p);
                 swSender.Flush();
