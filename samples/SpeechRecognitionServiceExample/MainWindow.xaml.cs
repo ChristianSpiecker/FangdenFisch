@@ -47,6 +47,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     using System.Windows;
     using System.Web;
     using System.Net.Http;
+    using Spire.Doc;
+    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using System.Windows.Xps.Packaging;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -84,6 +88,9 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// The microphone client
         /// </summary>
         private MicrophoneRecognitionClient micClient;
+
+        // Hier die Collection von den Xps-Dateien
+        ObservableCollection<String> xpsFilePaths = new ObservableCollection<String>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -948,7 +955,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             // Parse the IP address
 
-            string ipAdress = "172.26.38.110";
+            string ipAdress = "172.26.38.109";
             ipAddr = IPAddress.Parse(ipAdress);
 
 
@@ -969,22 +976,99 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 MessageBox.Show(e2.ToString());
             }
+
+
+
+            // Hole alle .docx Dateien aus dem Pfad und erstelle .xps Dateien
+            String path = @"Z:\win_data\Desktop\Empfangen\";
+            convertDocxToXps(getDocxFiles(path));
+
+            // Goenn dir die ganzen Xps Paths in die listbox (View)
+            addXpsFilePaths(path);
         }
 
         private void ReceiveMessages()
         {
-            
+
             // Receive the response from the server
-            srReceiver = new StreamReader(tcpServer.GetStream());
+            NetworkStream networkStream = tcpServer.GetStream();
+            srReceiver = new StreamReader(networkStream);
             while (Connected)
             {
-                Console.WriteLine("empfangen");
-                String con = srReceiver.ReadLine();
-                string StringMessage = HttpUtility.UrlDecode(con, System.Text.Encoding.UTF8);
-                processMessage(StringMessage);
-                //Filename?File\n kein File -> NoFile\n
+
+                // lese datei namen
+                string filename = srReceiver.ReadLine();
+                Console.WriteLine("Dateiname: " + filename);
+                
+                // lese datei groesse
+                int length = int.Parse(srReceiver.ReadLine());
+                Console.WriteLine("Dateigroeße: {0} bytes", length);
+
+                // lese bytes und fuege dem bugger hinzu
+                byte[] buffer = new byte[length];
+                int toRead = (int)length;
+                int read = 0;
+                while (toRead > 0)
+                {
+                    int noChars = networkStream.Read(buffer, read, toRead);
+                    read += noChars;
+                    toRead -= noChars;
+                }
+
+
+
+                // erzeuge die datei
+                BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename  + ".docx", FileMode.Create));
+                bWrite.Write(buffer);
+
+                // FLUSSSSSHHHHHHHHHHHHHH
+                networkStream.Flush();
+                bWrite.Flush();
+                bWrite.Close();
             }
         }
+
+        private Dictionary<String, Document> getDocxFiles(String path) {
+            Dictionary<String, Document> dic = new Dictionary<String, Document>();
+
+            string[] filePaths = Directory.GetFiles(path, "*.docx");
+            foreach (String fp in filePaths) {
+                Document doc = new Document();
+                doc.LoadFromFile(fp);
+                dic.Add(fp, doc);
+            }
+
+            return dic;
+        }
+
+        private void fileList_Click(object sender, EventArgs e)
+        {
+            string selected = fileList.SelectedValue.ToString();
+
+            XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
+            dok1.Document = xpsDocument.GetFixedDocumentSequence();
+        }
+
+
+        private void addXpsFilePaths(String path)
+        {
+            string[] filePaths = Directory.GetFiles(path, "*.xps");
+
+            foreach (String fp in filePaths)
+            {
+                fileList.Items.Add(fp);
+            }
+
+        }
+
+        private void convertDocxToXps(Dictionary<String, Document> dokumente) {
+            foreach (var doc in dokumente) {
+                Console.WriteLine("WILL ICH SEHEN " + doc.Key);
+                doc.Value.SaveToFile(doc.Key + ".xps", FileFormat.XPS);
+            }
+        }
+
+
 
         private void processMessage(String p)
         {
