@@ -952,6 +952,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void InitializeConnection(String anfrage)
         {
+            //Speicherort für die empfangen Dateien
+            String path = Environment.CurrentDirectory + @"\Empfangen\";
+            Console.WriteLine("PATH" + path);
+            // Speicherort erstmal leeren
+            deleteAllFiles(path);
+
             // Parse the IP address
             string ipAdress = "172.26.38.109";
             ipAddr = IPAddress.Parse(ipAdress);
@@ -969,7 +975,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 SendMessage(anfrage);
 
                 // Empfangen: Dateien empfangen
-                ReceiveMessages();
+                ReceiveMessages(path);
                 Console.WriteLine("Empfangen Vorbei");
 
                 // Start the thread for receiving messages and further communication
@@ -984,14 +990,13 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
 
             // Hole alle .docx Dateien aus dem Pfad und erstelle .xps Dateien
-            String path = @"Z:\win_data\Desktop\Empfangen\";
             convertDocxToXps(getDocxFiles(path));
 
             // Goenn dir die ganzen Xps Paths in die listbox (View)
             addXpsFilePaths(path);
         }
 
-        private void ReceiveMessages()
+        private void ReceiveMessages(String path)
         {
 
             // Receive the response from the server
@@ -1030,7 +1035,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                     }
 
                     // erzeuge die datei
-                    BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename + ".docx", FileMode.Create));
+                    BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename + ".docx", FileMode.Create));
                     bWrite.Write(buffer);
                     bWrite.Flush();
                     bWrite.Close();
@@ -1038,6 +1043,20 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             }
       
+        }
+
+        private void deleteAllFiles(String path)
+        {
+            System.IO.DirectoryInfo di = new DirectoryInfo(path);
+
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                dir.Delete(true);
+            }
         }
 
         private Dictionary<String, Document> getDocxFiles(String path) {
