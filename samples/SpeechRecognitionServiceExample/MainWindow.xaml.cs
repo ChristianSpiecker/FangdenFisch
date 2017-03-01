@@ -63,6 +63,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private Thread thrMessaging;
         private IPAddress ipAddr;
         private bool Connected;
+        //Speicherort für die empfangen Dateien
+        String path = Environment.CurrentDirectory + @"\Empfangen\";
         /// <summary>
         /// The isolated storage subscription key file name.
         /// </summary>
@@ -952,8 +954,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void InitializeConnection(String anfrage)
         {
-            //Speicherort für die empfangen Dateien
-            String path = Environment.CurrentDirectory + @"\Empfangen\";
+            
             Console.WriteLine("PATH" + path);
             // Speicherort erstmal leeren
             deleteAllFiles(path);
@@ -1072,7 +1073,36 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             return dic;
         }
 
-        private void fileList_Click(object sender, EventArgs e)
+        private void rightButton(object sender, EventArgs e)
+        {
+            Console.WriteLine("Hallo");
+            // Displays a SaveFileDialog so the user can save the Image
+            // assigned to Button2.
+            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            saveFileDialog1.Filter = "Docx|*.docx";
+            saveFileDialog1.Title = "Speicher die Datei";
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.
+            if (saveFileDialog1.FileName != "")
+            {
+                Console.WriteLine("DER GUTE PFAD: " + saveFileDialog1.FileName);
+
+                // HIER GEHTS WEITER SELECTED FILE VON .xps trennen
+                string selected = fileList.SelectedValue.ToString();
+
+                var fileName = "tmp.txt";
+                var from = @"c:\temp\" + fileName;
+
+                var to = saveFileDialog1.FileName;
+                if (!Directory.Exists(to))
+                    Directory.CreateDirectory(to);
+
+                File.Copy(from, to + fileName);
+            }
+        }
+
+        private void leftButton(object sender, EventArgs e)
         {
             string selected = fileList.SelectedValue.ToString();
 
