@@ -622,8 +622,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 for (int i = 0; i < e.PhraseResponse.Results.Length; i++)
                 {
                     Console.WriteLine(e.PhraseResponse.Results[i].DisplayText);
-                    InitializeConnection();
-                    SendMessage(e.PhraseResponse.Results[i].DisplayText);
+                    InitializeConnection(e.PhraseResponse.Results[i].DisplayText);
                 }
 
                 _meinText.Text = e.PhraseResponse.Results[0].DisplayText;
@@ -951,33 +950,38 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                    return s;
                }*/
 
-        private void InitializeConnection()
+        private void InitializeConnection(String anfrage)
         {
             // Parse the IP address
-
             string ipAdress = "172.26.38.109";
             ipAddr = IPAddress.Parse(ipAdress);
 
-
             // Start a new TCP connections to the chat server
             tcpServer = new TcpClient();
+
             try
             {
+                // Versuche mit Server zu verbinden
                 tcpServer.Connect(ipAddr, 420);
-                swSender = new StreamWriter(tcpServer.GetStream());
 
+                // Senden: Initialisiere StreamWriter und Sende Anfrage zum Server
+                swSender = new StreamWriter(tcpServer.GetStream());
+                SendMessage(anfrage);
+
+                // Empfangen: Dateien empfangen
+                ReceiveMessages();
+                Console.WriteLine("Empfangen Vorbei");
 
                 // Start the thread for receiving messages and further communication
-                thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
-                thrMessaging.Start();
-                Connected = true;
+                //thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
+                //thrMessaging.Start();
+                //Connected = true;
+
             }
             catch (Exception e2)
             {
                 MessageBox.Show(e2.ToString());
             }
-
-
 
             // Hole alle .docx Dateien aus dem Pfad und erstelle .xps Dateien
             String path = @"Z:\win_data\Desktop\Empfangen\";
@@ -993,39 +997,47 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             // Receive the response from the server
             NetworkStream networkStream = tcpServer.GetStream();
             srReceiver = new StreamReader(networkStream);
-            while (Connected)
+
+            int fileCount = int.Parse(srReceiver.ReadLine());
+            Thread.Sleep(100);
+            for (int i = fileCount; i > 0; i--)
             {
-
-                // lese datei namen
-                string filename = srReceiver.ReadLine();
-                Console.WriteLine("Dateiname: " + filename);
-                
-                // lese datei groesse
-                int length = int.Parse(srReceiver.ReadLine());
-                Console.WriteLine("Dateigroeße: {0} bytes", length);
-
-                // lese bytes und fuege dem bugger hinzu
-                byte[] buffer = new byte[length];
-                int toRead = (int)length;
-                int read = 0;
-                while (toRead > 0)
+                // Sende wenn bereit
+                swSender.WriteLine("done");
+                swSender.Flush();
+                // Betrachtet eine Datei
+                if ((srReceiver.ReadLine() == "Start"))
                 {
-                    int noChars = networkStream.Read(buffer, read, toRead);
-                    read += noChars;
-                    toRead -= noChars;
+                    
+                    //erst kommt Filename
+                    string filename = srReceiver.ReadLine();
+                    Console.WriteLine("Dateiname: " + filename);
+
+                    // lese datei groesse
+                    int length = int.Parse(srReceiver.ReadLine());
+                    Console.WriteLine("Dateigroeße: {0} bytes", length);
+
+                    // lese bytes und fuege dem buffer hinzu
+                    byte[] buffer = new byte[length];
+                    int toRead = length;
+                    int read = 0;
+
+                    while (toRead > 0)
+                    {
+                        int noChars = networkStream.Read(buffer, read, toRead);
+                        read += noChars;
+                        toRead -= noChars;
+                    }
+
+                    // erzeuge die datei
+                    BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename + ".docx", FileMode.Create));
+                    bWrite.Write(buffer);
+                    bWrite.Flush();
+                    bWrite.Close();
                 }
 
-
-
-                // erzeuge die datei
-                BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename  + ".docx", FileMode.Create));
-                bWrite.Write(buffer);
-
-                // FLUSSSSSHHHHHHHHHHHHHH
-                networkStream.Flush();
-                bWrite.Flush();
-                bWrite.Close();
             }
+      
         }
 
         private Dictionary<String, Document> getDocxFiles(String path) {
@@ -1049,7 +1061,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             dok1.Document = xpsDocument.GetFixedDocumentSequence();
         }
 
-
         private void addXpsFilePaths(String path)
         {
             string[] filePaths = Directory.GetFiles(path, "*.xps");
@@ -1068,12 +1079,11 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
         }
 
-
-
         private void processMessage(String p)
         {
             Console.WriteLine("der server antwortet: " +p);
         }
+
         private void SendMessage(String p)
         {
             if (p != "")
@@ -1084,7 +1094,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 p = HttpUtility.UrlEncode(p, System.Text.Encoding.UTF8);
                 swSender.WriteLine(p);
                 swSender.Flush();
-
             }
 
         }
