@@ -53,6 +53,11 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     using System.Linq;
     using Spire.Doc;
     using Spire.Pdf;
+    using System.Drawing;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Resources;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -62,11 +67,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private StreamWriter swSender;
         private StreamReader srReceiver;
         private TcpClient tcpServer;
-        private Thread thrMessaging;
+        //private Thread thrMessaging;
         private IPAddress ipAddr;
-        private bool Connected;
+        //private bool Connected;
         //Speicherort für die empfangen Dateien
         String path = Environment.CurrentDirectory + @"\Empfangen\";
+        String path2 = Environment.CurrentDirectory;
         /// <summary>
         /// The isolated storage subscription key file name.
         /// </summary>
@@ -103,7 +109,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             this.InitializeComponent();
             this.Initialize();
-            
         }
 
         #region Events
@@ -335,6 +340,15 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void Initialize()
         {
+
+            // Background Mic Image
+            string imagePath = path2 + @"\..\..\images\";
+            Console.WriteLine(imagePath);
+            ImageBrush imgBrush = new ImageBrush();
+            imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_standard.png", UriKind.Relative));
+            _startButton.Background = imgBrush;
+
+
             this.IsMicrophoneClientShortPhrase = true;
             this.IsMicrophoneClientWithIntent = false;
             this.IsMicrophoneClientDictation = false;
@@ -351,7 +365,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            this._startButton.IsEnabled = false;
+            // Background Mic Image
+            string imagePath = path2 + @"\..\..\images\";
+            Console.WriteLine(imagePath);
+            ImageBrush imgBrush = new ImageBrush();
+            imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_record.png", UriKind.Relative));
+            _startButton.Background = imgBrush;
+
+
+
+
             //this._radioGroup.IsEnabled = false;
 
             this.LogRecognitionStart();
@@ -385,6 +408,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                         this.CreateDataRecoClient();
                     }
                 }
+                
 
                 this.SendAudioHelper((this.Mode == SpeechRecognitionMode.ShortPhrase) ? this.ShortWaveFile : this.LongWaveFile);
             }
@@ -769,8 +793,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             Trace.WriteLine(formattedStr);
             Dispatcher.Invoke(() =>
             {
-                _logText.Text += (formattedStr + "\n");
-                _logText.ScrollToEnd();
+                //_logText.Text += (formattedStr + "\n");
+                //_logText.ScrollToEnd();
             });
             // unser code
             //_meinText = _logText.Text;
@@ -891,7 +915,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 this.dataClient = null;
             }
 
-            this._logText.Text = string.Empty;
+            //this._logText.Text = string.Empty;
             this._startButton.IsEnabled = true;
             //this._radioGroup.IsEnabled = true;
         }
