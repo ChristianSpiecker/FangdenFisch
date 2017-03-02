@@ -346,6 +346,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             Console.WriteLine(imagePath);
             ImageBrush imgBrush = new ImageBrush();
             imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_standard.png", UriKind.Relative));
+
             _startButton.Background = imgBrush;
 
 
@@ -652,6 +653,13 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                     Console.WriteLine(e.PhraseResponse.Results[i].DisplayText);
                     InitializeConnection(e.PhraseResponse.Results[i].DisplayText);
                 }
+
+                // Background Mic Image
+                string imagePath = path2 + @"\..\..\images\";
+                Console.WriteLine(imagePath);
+                ImageBrush imgBrush = new ImageBrush();
+                imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_standard.png", UriKind.Relative));
+                _startButton.Background = imgBrush;
 
                 _meinText.Text = e.PhraseResponse.Results[0].DisplayText;
                 this.WriteLine();
@@ -1203,7 +1211,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Recsf";
+                //p = "Gib mir alle Recsf";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
