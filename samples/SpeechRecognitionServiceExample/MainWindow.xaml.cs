@@ -1017,35 +1017,36 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 swSender.Flush();
                 // Betrachtet eine Datei
 
-                if (srReceiver.ReadLine().Equals("Start"))
+
+
+                //erst kommt Filename
+                string filename = srReceiver.ReadLine();
+                Console.WriteLine("Dateiname: " + filename);
+
+                // lese datei groesse
+                int length = int.Parse(srReceiver.ReadLine());
+                Console.WriteLine("Dateigroeße: {0} bytes", length);
+
+                // lese bytes und fuege dem buffer hinzu
+                byte[] buffer = new byte[length];
+                int toRead = length;
+                int read = 0;
+
+                while (toRead > 0)
                 {
-
-                    //erst kommt Filename
-                    string filename = srReceiver.ReadLine();
-                    Console.WriteLine("Dateiname: " + filename);
-
-                    // lese datei groesse
-                    int length = int.Parse(srReceiver.ReadLine());
-                    Console.WriteLine("Dateigroeße: {0} bytes", length);
-
-                    // lese bytes und fuege dem buffer hinzu
-                    byte[] buffer = new byte[length];
-                    int toRead = length;
-                    int read = 0;
-
-                    while (toRead > 0)
-                    {
-                        int noChars = networkStream.Read(buffer, read, toRead);
-                        read += noChars;
-                        toRead -= noChars;
-                    }
-
-                    // erzeuge die datei
-                    BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename, FileMode.Create));
-                    bWrite.Write(buffer);
-                    bWrite.Flush();
-                    bWrite.Close();
+                    int noChars = networkStream.Read(buffer, read, toRead);
+                    read += noChars;
+                    toRead -= noChars;
+                    Console.WriteLine("Chars: " + noChars);
+                    Console.WriteLine("Bytes: " + toRead);
                 }
+
+                // erzeuge die datei
+                BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename, FileMode.Create));
+                bWrite.Write(buffer);
+                bWrite.Flush();
+                bWrite.Close();
+
             }
         }
 
@@ -1118,10 +1119,14 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void leftButton(object sender, EventArgs e)
         {
-            string selected = fileList.SelectedValue.ToString();
+            if(fileList.SelectedValue != null)
+            {
+                string selected = fileList.SelectedValue.ToString();
 
-            XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
-            dok1.Document = xpsDocument.GetFixedDocumentSequence();
+                XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
+                dok1.Document = xpsDocument.GetFixedDocumentSequence();
+            }
+
         }
 
         private void addXpsFilePaths(String path)
@@ -1147,7 +1152,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Prospekte";
+                p = "Gib mir alle Angebote vom Kunden Rheinwerk Group vom 11.9.2014 bis zum 12.9.2014";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
