@@ -47,11 +47,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     using System.Windows;
     using System.Web;
     using System.Net.Http;
-    using Spire.Doc;
     using System.Collections.ObjectModel;
     using System.Collections.Generic;
     using System.Windows.Xps.Packaging;
     using System.Linq;
+    using Spire.Doc;
+    using Spire.Pdf;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -958,12 +959,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             
             Console.WriteLine("PATH" + path);
             // Speicherort anlegen
-            Directory.CreateDirectory(path);
+            
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             // Speicherort erstmal leeren
             deleteAllFiles(path);
 
             // Parse the IP address
-            string ipAdress = "172.26.38.107";
+            string ipAdress = "172.26.38.109";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
@@ -1008,54 +1013,58 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             srReceiver = new StreamReader(networkStream);
 
             int fileCount = int.Parse(srReceiver.ReadLine());
-            Thread.Sleep(1000);
+            Thread.Sleep(100);
             for (int i = fileCount; i > 0; i--)
             {
 
                 // Sende wenn bereit
                 swSender.WriteLine("done");
                 swSender.Flush();
-                // Betrachtet eine Datei
+                
+                //erst kommt Filename
+                string filename = srReceiver.ReadLine();
+                Console.WriteLine("Dateiname: " + filename);
 
-                if (srReceiver.ReadLine().Equals("Start"))
+                // lese datei groesse
+                int length = int.Parse(srReceiver.ReadLine());
+                Console.WriteLine("Dateigroeße: {0} bytes", length);
+
+                // lese bytes und fuege dem buffer hinzu
+                byte[] buffer = new byte[length];
+                int toRead = length;
+                int read = 0;
+
+                while (toRead > 0)
                 {
-
-                    //erst kommt Filename
-                    string filename = srReceiver.ReadLine();
-                    Console.WriteLine("Dateiname: " + filename);
-
-                    // lese datei groesse
-                    int length = int.Parse(srReceiver.ReadLine());
-                    Console.WriteLine("Dateigroeße: {0} bytes", length);
-
-                    // lese bytes und fuege dem buffer hinzu
-                    byte[] buffer = new byte[length];
-                    int toRead = length;
-                    int read = 0;
-
-                    while (toRead > 0)
-                    {
-                        int noChars = networkStream.Read(buffer, read, toRead);
-                        read += noChars;
-                        toRead -= noChars;
-                    }
-
-                    // erzeuge die datei
-                    BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename, FileMode.Create));
-                    bWrite.Write(buffer);
-                    bWrite.Flush();
-                    bWrite.Close();
+                    int noChars = networkStream.Read(buffer, read, toRead);
+                    read += noChars;
+                    toRead -= noChars;
                 }
+
+                // erzeuge die datei
+                BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename, FileMode.Create));
+                bWrite.Write(buffer);
+                bWrite.Flush();
+                bWrite.Close();
             }
+            
         }
 
         /* Konvertiere die Datein zu .xps Dateien */
-        private void convertDocxToXps(Dictionary<String, Document> dokumente)
+        private void convertDocxToXps(Dictionary<String, Object> dokumente)
         {
             foreach (var doc in dokumente)
             {
-                Console.WriteLine("WILL ICH SEHEN " + doc.Key);
-                doc.Value.SaveToFile(doc.Key + ".xps", FileFormat.XPS);
+                if (doc.Key.EndsWith("docx"))
+                {
+                    Console.WriteLine("WILL ICH SEHEN " + doc.Key);
+                    ((Document)doc.Value).SaveToFile(doc.Key + ".xps", Spire.Doc.FileFormat.XPS);
+                }
+                else if (doc.Key.EndsWith("pdf"))
+                {
+                    Console.WriteLine("WILL ICH SEHEN " + doc.Key);
+                    ((PdfDocument)doc.Value).SaveToFile(doc.Key + ".xps", Spire.Pdf.FileFormat.XPS);
+                }
             }
         }
 
@@ -1075,16 +1084,28 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
         }
 
-        private Dictionary<String, Document> getDocxFiles(String path) {
-            Dictionary<String, Document> dic = new Dictionary<String, Document>();
+        private Dictionary<String, Object> getDocxFiles(String path) {
+            Dictionary<String, Object> dic = new Dictionary<String, Object>();
 
             List<string> filePathsDocx = Directory.GetFiles(path, "*.*").Where(file => file.ToLower().EndsWith("docx") || file.ToLower().EndsWith("pdf")).ToList();
-            foreach (String fp in filePathsDocx) {
-                Document doc = new Document();
-                doc.LoadFromFile(fp);
-                dic.Add(fp, doc);
+            foreach (String fp in filePathsDocx)
+            {
+                if (fp.EndsWith("docx"))
+                {
+                    Document doc = new Document();
+                    doc.LoadFromFile(fp);
+                    dic.Add(fp, doc);
+                }
+                else if (fp.EndsWith("pdf"))
+                {
+                    /*
+                    PdfDocument doc = new PdfDocument();
+                    doc.LoadFromFile(fp);
+                    dic.Add(fp, doc);
+                    */
+                }
+                
             }
-
             return dic;
         }
 
@@ -1093,35 +1114,42 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
          */
         private void rightButton(object sender, EventArgs e)
         {
-            // Zeigt einen Speicherdialog an
-            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            saveFileDialog1.Filter = "Docx|*.docx";
-            saveFileDialog1.Title = "Speicher die Datei";
-            saveFileDialog1.ShowDialog();
+            if (fileList.SelectedValue != null) { 
+                // Zeigt einen Speicherdialog an
+                System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog1.Filter = "Docx|*.docx";
+                saveFileDialog1.Title = "Speicher die Datei";
+                saveFileDialog1.ShowDialog();
 
-            // Wenn der Dateiname bestimmt worden ist..
-            if (saveFileDialog1.FileName != "")
-            {
-                // Der aktuell ausgewählte Pfad aus der Liste (Dateiendung .xps)
-                string selected = fileList.SelectedValue.ToString();
+                // Wenn der Dateiname bestimmt worden ist..
+                if (saveFileDialog1.FileName != "")
+                {
+                    // Der aktuell ausgewählte Pfad aus der Liste (Dateiendung .xps)
+                    string selected = fileList.SelectedValue.ToString();
 
-                // Trenne die Dateiendung .xps, somit ist die Dateiendung .docx
-                string docxPath = selected.Substring(0, selected.LastIndexOf('.'));
+                    // Trenne die Dateiendung .xps, somit ist die Dateiendung .docx
+                    string docxPath = selected.Substring(0, selected.LastIndexOf('.'));
 
-                // Ziel: Vom Benutzer gewählter neuer Pfad
-                var to = saveFileDialog1.FileName;
+                    // Ziel: Vom Benutzer gewählter neuer Pfad
+                    var to = saveFileDialog1.FileName;
                 
-                // Kopiere die Datei zu dem gewählten Pfad
-                File.Copy(docxPath, to);
+                    // Kopiere die Datei zu dem gewählten Pfad
+                    File.Copy(docxPath, to);
+                }
             }
         }
 
         private void leftButton(object sender, EventArgs e)
         {
-            string selected = fileList.SelectedValue.ToString();
+            if (fileList.SelectedValue != null) {
+                string selected = fileList.SelectedValue.ToString();
 
-            XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
-            dok1.Document = xpsDocument.GetFixedDocumentSequence();
+                XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
+                dok1.Document = xpsDocument.GetFixedDocumentSequence();
+            }
+
+
+            
         }
 
         private void addXpsFilePaths(String path)
@@ -1147,7 +1175,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Prospekte";
+                p = "Gib mir alle Rechnungen";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
