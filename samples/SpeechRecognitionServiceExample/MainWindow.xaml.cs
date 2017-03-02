@@ -957,6 +957,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             
             Console.WriteLine("PATH" + path);
+            // Speicherort anlegen
+            Directory.CreateDirectory(path);
             // Speicherort erstmal leeren
             deleteAllFiles(path);
 
@@ -1006,34 +1008,37 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             srReceiver = new StreamReader(networkStream);
 
             int fileCount = int.Parse(srReceiver.ReadLine());
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
             for (int i = fileCount; i > 0; i--)
             {
+
                 // Sende wenn bereit
                 swSender.WriteLine("done");
                 swSender.Flush();
                 // Betrachtet eine Datei
-               
-                    
-                //erst kommt Filename
-                string filename = srReceiver.ReadLine();
-                Console.WriteLine("Dateiname: " + filename);
 
-                // lese datei groesse
-                int length = int.Parse(srReceiver.ReadLine());
-                Console.WriteLine("Dateigroeße: {0} bytes", length);
-
-                // lese bytes und fuege dem buffer hinzu
-                byte[] buffer = new byte[length];
-                int toRead = length;
-                int read = 0;
-
-                while (toRead > 0)
+                if (srReceiver.ReadLine().Equals("Start"))
                 {
-                    int noChars = networkStream.Read(buffer, read, toRead);
-                    read += noChars;
-                    toRead -= noChars;
-                }
+
+                    //erst kommt Filename
+                    string filename = srReceiver.ReadLine();
+                    Console.WriteLine("Dateiname: " + filename);
+
+                    // lese datei groesse
+                    int length = int.Parse(srReceiver.ReadLine());
+                    Console.WriteLine("Dateigroeße: {0} bytes", length);
+
+                    // lese bytes und fuege dem buffer hinzu
+                    byte[] buffer = new byte[length];
+                    int toRead = length;
+                    int read = 0;
+
+                    while (toRead > 0)
+                    {
+                        int noChars = networkStream.Read(buffer, read, toRead);
+                        read += noChars;
+                        toRead -= noChars;
+                    }
 
                     // erzeuge die datei
                     BinaryWriter bWrite = new BinaryWriter(File.Open(path + filename, FileMode.Create));
@@ -1041,8 +1046,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                     bWrite.Flush();
                     bWrite.Close();
                 }
-
-      
+            }
         }
 
         /* Konvertiere die Datein zu .xps Dateien */
@@ -1058,14 +1062,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void deleteAllFiles(String path)
         {
             System.IO.DirectoryInfo di = new DirectoryInfo(path);
-
-            foreach (FileInfo file in di.GetFiles())
+            if(di.GetFiles().Count() > 0)
             {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.GetDirectories())
-            {
-                dir.Delete(true);
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in di.GetDirectories())
+                {
+                    dir.Delete(true);
+                }
             }
         }
 
@@ -1140,7 +1146,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                p = "Gib mir alle Lieferscheine mit 0815";
+                //p = "Gib mir alle Lieferscheine mit 0815";
+                p = "Gib mir alle Prospekte";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
