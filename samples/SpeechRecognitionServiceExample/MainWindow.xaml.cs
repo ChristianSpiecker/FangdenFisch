@@ -99,7 +99,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             this.InitializeComponent();
             this.Initialize();
-                     
+            
         }
 
         #region Events
@@ -953,7 +953,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void InitializeConnection(String anfrage)
         {
             // Parse the IP address
-            string ipAdress = "172.26.38.109";
+            string ipAdress = "172.26.38.107";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
@@ -1006,37 +1006,35 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 swSender.WriteLine("done");
                 swSender.Flush();
                 // Betrachtet eine Datei
-                if ((srReceiver.ReadLine() == "Start"))
-                {
+               
                     
-                    //erst kommt Filename
-                    string filename = srReceiver.ReadLine();
-                    Console.WriteLine("Dateiname: " + filename);
+                //erst kommt Filename
+                string filename = srReceiver.ReadLine();
+                Console.WriteLine("Dateiname: " + filename);
 
-                    // lese datei groesse
-                    int length = int.Parse(srReceiver.ReadLine());
-                    Console.WriteLine("Dateigroeße: {0} bytes", length);
+                // lese datei groesse
+                int length = int.Parse(srReceiver.ReadLine());
+                Console.WriteLine("Dateigroeße: {0} bytes", length);
 
-                    // lese bytes und fuege dem buffer hinzu
-                    byte[] buffer = new byte[length];
-                    int toRead = length;
-                    int read = 0;
+                // lese bytes und fuege dem buffer hinzu
+                byte[] buffer = new byte[length];
+                int toRead = length;
+                int read = 0;
 
-                    while (toRead > 0)
-                    {
-                        int noChars = networkStream.Read(buffer, read, toRead);
-                        read += noChars;
-                        toRead -= noChars;
-                    }
-
-                    // erzeuge die datei
-                    BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename + ".docx", FileMode.Create));
-                    bWrite.Write(buffer);
-                    bWrite.Flush();
-                    bWrite.Close();
+                while (toRead > 0)
+                {
+                    int noChars = networkStream.Read(buffer, read, toRead);
+                    read += noChars;
+                    toRead -= noChars;
                 }
 
-            }
+                // erzeuge die datei
+                BinaryWriter bWrite = new BinaryWriter(File.Open("Z:/win_data/Desktop/Empfangen/" + filename + ".docx", FileMode.Create));
+                bWrite.Write(buffer);
+                bWrite.Flush();
+                bWrite.Close();
+             }
+
       
         }
 
@@ -1090,8 +1088,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                p = "Gib mir alle Rechnungen vom Kunden Rheinwerk Group";
+                p = "Gib mir alle Lieferscheine mit 0815";
+
+                p = p.Replace("ä","ae");
+                p = p.Replace("ö", "oe");
+                p = p.Replace("ü", "ue");
+                p = p.Replace("ß", "ss");
+
+                //"Gib mir alle Rechnungen vom Kunden Rheinwerk Group"
                 p = HttpUtility.UrlEncode(p, System.Text.Encoding.UTF8);
+                Console.WriteLine(p);
                 swSender.WriteLine(p);
                 swSender.Flush();
             }
