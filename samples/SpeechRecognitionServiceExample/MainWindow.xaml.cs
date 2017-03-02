@@ -372,6 +372,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 xpsDocument.Close();
             }
+            dok1.Document = null;
             
 
             // Background Mic Image
