@@ -365,6 +365,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
+            
+
             // Background Mic Image
             string imagePath = path2 + @"\..\..\images\";
             Console.WriteLine(imagePath);
@@ -372,8 +374,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_record.png", UriKind.Relative));
             _startButton.Background = imgBrush;
 
-
-
+            Document doc = new Document();
+            doc.SaveToFile(imagePath + @"dokTemp.docx" + ".xps", Spire.Doc.FileFormat.XPS);
+            XpsDocument xpsDocument = new XpsDocument(imagePath + @"dokTemp.docx", FileAccess.Read);
+            dok1.Document = xpsDocument.GetFixedDocumentSequence();
 
             //this._radioGroup.IsEnabled = false;
 
@@ -992,7 +996,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             deleteAllFiles(path);
 
             // Parse the IP address
-            string ipAdress = "172.26.38.107";
+            string ipAdress = "172.26.38.109";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
@@ -1182,6 +1186,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void addXpsFilePaths(String path)
         {
+            fileList.Items.Clear();
             string[] filePaths = Directory.GetFiles(path, "*.xps");
 
             foreach (String fp in filePaths)
@@ -1203,7 +1208,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Recsf";
+                //p = "Gib mir alle Recsf";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
