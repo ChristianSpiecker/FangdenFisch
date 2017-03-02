@@ -67,6 +67,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private StreamWriter swSender;
         private StreamReader srReceiver;
         private TcpClient tcpServer;
+        private XpsDocument xpsDocument;
         //private Thread thrMessaging;
         private IPAddress ipAddr;
         //private bool Connected;
@@ -109,6 +110,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             this.InitializeComponent();
             this.Initialize();
+            
         }
 
         #region Events
@@ -366,6 +368,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
+            if(xpsDocument != null)
+            {
+                xpsDocument.Close();
+            }
             
 
             // Background Mic Image
@@ -375,10 +381,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_record.png", UriKind.Relative));
             _startButton.Background = imgBrush;
 
-            Document doc = new Document();
-            doc.SaveToFile(imagePath + @"dokTemp.docx" + ".xps", Spire.Doc.FileFormat.XPS);
-            XpsDocument xpsDocument = new XpsDocument(imagePath + @"dokTemp.docx", FileAccess.Read);
-            dok1.Document = xpsDocument.GetFixedDocumentSequence();
 
             //this._radioGroup.IsEnabled = false;
 
@@ -992,10 +994,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void InitializeConnection(String anfrage)
         {
-            
             Console.WriteLine("PATH" + path);
             // Speicherort anlegen
-            
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -1004,7 +1004,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             deleteAllFiles(path);
 
             // Parse the IP address
-            string ipAdress = "172.26.38.109";
+            string ipAdress = "10.156.3.5";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
@@ -1013,7 +1013,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             try
             {
                 // Versuche mit Server zu verbinden
-                tcpServer.Connect(ipAddr, 420);
+                tcpServer.Connect(ipAddr, 1024);
 
                 // Senden: Initialisiere StreamWriter und Sende Anfrage zum Server
                 swSender = new StreamWriter(tcpServer.GetStream());
@@ -1043,6 +1043,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void ReceiveMessages(String path)
         {
+            
 
             // Receive the response from the server
             NetworkStream networkStream = tcpServer.GetStream();
@@ -1184,7 +1185,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             if (fileList.SelectedValue != null) {
                 string selected = fileList.SelectedValue.ToString();
 
-                XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
+                xpsDocument = new XpsDocument(selected, FileAccess.Read);
                 dok1.Document = xpsDocument.GetFixedDocumentSequence();
             }
 
@@ -1216,7 +1217,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                //p = "Gib mir alle Recsf";
+                //p = "Gib mir alle Rechnungen";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
