@@ -25,7 +25,7 @@
         <TextBox x:Name="_meinText" Text="" Height="30" Width="400" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="151,23,199,0" Grid.ColumnSpan="2"/>
 
         <!-- Record Button -->
-        <Button x:Name="_startButton" Grid.Column="1" Content="Aufnahme" Click="StartButton_Click" Height="50" Width="50" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="291,13,143,0">
+        <Button x:Name="_startButton"  Grid.Column="1"  Click="StartButton_Click" Height="50" Width="50" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="291,13,143,0">
         </Button>
 
 
