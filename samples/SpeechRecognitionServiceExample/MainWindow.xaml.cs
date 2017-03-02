@@ -968,7 +968,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             deleteAllFiles(path);
 
             // Parse the IP address
-            string ipAdress = "172.26.38.109";
+            string ipAdress = "172.26.38.107";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
@@ -1013,6 +1013,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             srReceiver = new StreamReader(networkStream);
 
             int fileCount = int.Parse(srReceiver.ReadLine());
+            if (fileCount == 0)
+            {
+                MessageBox.Show("Keine Ergebnisse erhalten.");
+            }
             Thread.Sleep(100);
             for (int i = fileCount; i > 0; i--)
             {
@@ -1175,7 +1179,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Rechnungen";
+                p = "Gib mir alle Recsf";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");
