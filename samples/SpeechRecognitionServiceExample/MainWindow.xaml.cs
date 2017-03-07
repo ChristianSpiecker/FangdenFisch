@@ -53,6 +53,11 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     using System.Linq;
     using Spire.Doc;
     using Spire.Pdf;
+    using System.Drawing;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Resources;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -62,11 +67,13 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private StreamWriter swSender;
         private StreamReader srReceiver;
         private TcpClient tcpServer;
-        private Thread thrMessaging;
+        private XpsDocument xpsDocument;
+        //private Thread thrMessaging;
         private IPAddress ipAddr;
-        private bool Connected;
+        //private bool Connected;
         //Speicherort für die empfangen Dateien
         String path = Environment.CurrentDirectory + @"\Empfangen\";
+        String path2 = Environment.CurrentDirectory;
         /// <summary>
         /// The isolated storage subscription key file name.
         /// </summary>
@@ -335,6 +342,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void Initialize()
         {
+
+            // Background Mic Image
+            string imagePath = path2 + @"\..\..\images\";
+            Console.WriteLine(imagePath);
+            ImageBrush imgBrush = new ImageBrush();
+            imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_standard.png", UriKind.Relative));
+
+            _startButton.Background = imgBrush;
+
+
             this.IsMicrophoneClientShortPhrase = true;
             this.IsMicrophoneClientWithIntent = false;
             this.IsMicrophoneClientDictation = false;
@@ -351,7 +368,21 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            this._startButton.IsEnabled = false;
+            if(xpsDocument != null)
+            {
+                xpsDocument.Close();
+            }
+            dok1.Document = null;
+            
+
+            // Background Mic Image
+            string imagePath = path2 + @"\..\..\images\";
+            Console.WriteLine(imagePath);
+            ImageBrush imgBrush = new ImageBrush();
+            imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_record.png", UriKind.Relative));
+            _startButton.Background = imgBrush;
+
+
             //this._radioGroup.IsEnabled = false;
 
             this.LogRecognitionStart();
@@ -385,6 +416,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                         this.CreateDataRecoClient();
                     }
                 }
+                
 
                 this.SendAudioHelper((this.Mode == SpeechRecognitionMode.ShortPhrase) ? this.ShortWaveFile : this.LongWaveFile);
             }
@@ -629,6 +661,13 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                     InitializeConnection(e.PhraseResponse.Results[i].DisplayText);
                 }
 
+                // Background Mic Image
+                string imagePath = path2 + @"\..\..\images\";
+                Console.WriteLine(imagePath);
+                ImageBrush imgBrush = new ImageBrush();
+                imgBrush.ImageSource = new BitmapImage(new Uri(imagePath + @"mic_standard.png", UriKind.Relative));
+                _startButton.Background = imgBrush;
+
                 _meinText.Text = e.PhraseResponse.Results[0].DisplayText;
                 this.WriteLine();
             }
@@ -769,8 +808,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             Trace.WriteLine(formattedStr);
             Dispatcher.Invoke(() =>
             {
-                _logText.Text += (formattedStr + "\n");
-                _logText.ScrollToEnd();
+                //_logText.Text += (formattedStr + "\n");
+                //_logText.ScrollToEnd();
             });
             // unser code
             //_meinText = _logText.Text;
@@ -891,7 +930,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 this.dataClient = null;
             }
 
-            this._logText.Text = string.Empty;
+            //this._logText.Text = string.Empty;
             this._startButton.IsEnabled = true;
             //this._radioGroup.IsEnabled = true;
         }
@@ -956,10 +995,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void InitializeConnection(String anfrage)
         {
-            
             Console.WriteLine("PATH" + path);
             // Speicherort anlegen
-            
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -977,7 +1014,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             try
             {
                 // Versuche mit Server zu verbinden
-                tcpServer.Connect(ipAddr, 420);
+                tcpServer.Connect(ipAddr, 1024);
 
                 // Senden: Initialisiere StreamWriter und Sende Anfrage zum Server
                 swSender = new StreamWriter(tcpServer.GetStream());
@@ -1007,6 +1044,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void ReceiveMessages(String path)
         {
+            
 
             // Receive the response from the server
             NetworkStream networkStream = tcpServer.GetStream();
@@ -1148,7 +1186,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             if (fileList.SelectedValue != null) {
                 string selected = fileList.SelectedValue.ToString();
 
-                XpsDocument xpsDocument = new XpsDocument(selected, FileAccess.Read);
+                xpsDocument = new XpsDocument(selected, FileAccess.Read);
                 dok1.Document = xpsDocument.GetFixedDocumentSequence();
             }
 
@@ -1158,6 +1196,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void addXpsFilePaths(String path)
         {
+            fileList.Items.Clear();
             string[] filePaths = Directory.GetFiles(path, "*.xps");
 
             foreach (String fp in filePaths)
@@ -1179,7 +1218,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 Console.Write("gesendet: " + p);
                 // ZUM TESTEN ______________________________________________________________________________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //p = "Gib mir alle Lieferscheine mit 0815";
-                p = "Gib mir alle Recsf";
+                //p = "Gib mir alle Rechnungen";
 
                 p = p.Replace("ä","ae");
                 p = p.Replace("ö", "oe");

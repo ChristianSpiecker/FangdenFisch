@@ -136,7 +136,10 @@
     <Content Include="batman.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="images\asas.jpg" />
     <Content Include="images\microphone-icon.jpg" />
+    <Content Include="images\mic_record.png" />
+    <Content Include="images\mic_standard.png" />
     <Content Include="whatstheweatherlike.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
