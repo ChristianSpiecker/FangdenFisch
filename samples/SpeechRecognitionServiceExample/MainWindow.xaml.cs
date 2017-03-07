@@ -1117,7 +1117,11 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 foreach (FileInfo file in di.GetFiles())
                 {
-                    file.Delete();
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (Exception e) { }
                 }
                 foreach (DirectoryInfo dir in di.GetDirectories())
                 {
