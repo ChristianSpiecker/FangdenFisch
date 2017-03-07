@@ -1014,7 +1014,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             try
             {
                 // Versuche mit Server zu verbinden
-                tcpServer.Connect(ipAddr, 1024);
+                tcpServer.Connect(ipAddr, 420);
 
                 // Senden: Initialisiere StreamWriter und Sende Anfrage zum Server
                 swSender = new StreamWriter(tcpServer.GetStream());
