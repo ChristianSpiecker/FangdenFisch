@@ -968,7 +968,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             deleteAllFiles(path);
 
             // Parse the IP address
-            string ipAdress = "172.26.38.107";
+            string ipAdress = "172.26.38.106";
             ipAddr = IPAddress.Parse(ipAdress);
 
             // Start a new TCP connections to the chat server
